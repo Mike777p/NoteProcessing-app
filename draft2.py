@@ -19,6 +19,7 @@ def format_and_tag_note(array):
     for q in array:
         placeholder += q
         if (q == "\n"):
+            print(placeholder)
             tags = input(f"Note: {placeholder} - Type tags starting with a hash with a space between them: ")
             if tags == q:
                 break

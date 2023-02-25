@@ -1,9 +1,5 @@
-TAGS = ["#favouriteQuotes", "#originalQuotes", "#love", "#4MyChildren", "#advice", "#anxiety", "#apocalypse", "#biography",
-        "#blog", "#book", "#control", "#corruption", "#delusion", "#discipline", "#educuation", "#equality", "#film",
-        "#fitness", "#food", "#gender", "#getItDone", "#governance", "#illusion", "#inspire", "#intelligence", "#journal",
-        "#kelly", "#law", "#life", "#morality", "#motivate", "#produce", "#sleep", "#statusAnxiety",
-        "#struggle", "#travel", "#truth", "#work"]
-TAGS.sort()
+from tags import TAGS
+
 
 import tkinter.filedialog
 
@@ -35,7 +31,7 @@ class MyGUI:
                 self.row = 0
                 self.column = 0
                 for tag in self.tags:
-                        self.button1 = tk.Button(self.button_frame, text=f"{tag}", font=('Arial', 18), command=None)
+                        self.button1 = tk.Checkbutton(self.button_frame, text=f"{tag}", font=('Arial', 18), command=self.print_a_tag(tag))
                         self.button1.grid(row=self.row, column=self.column, sticky=tk.W + tk.E)
                         if self.column < 2:
                                 self.column += 1
@@ -43,7 +39,6 @@ class MyGUI:
                                 self.column = 0
                         if self.column % 3 == 0:
                                 self.row += 1
-
                 self.button_frame.pack(fill="x")
 
                 self.next_button = tk.Button(root, text="Next", font=('Arial', 18), command=self.show_next).pack(padx=50, pady=50)
@@ -62,11 +57,15 @@ class MyGUI:
                                         self.items.append(placeholder)
                                         placeholder = ""
 
+
         def show_next(self):
                 self.current_index += 1
                 if self.current_index >= len(self.items):
                         self.current_index = 0
                 self.label.config(text=self.items[self.current_index])
+
+        def print_a_tag(self, tag):
+                print(tag)
 
 
 root = tk.Tk()
@@ -74,3 +73,12 @@ my_gui = MyGUI(root, TAGS)
 root.mainloop()
 
 
+# notes = [{
+#   "note": "If something is possible for any man it is possible for you too",
+#   "tags": ["4MyChildren", "advice", "anxiety"]
+#
+# },{
+#   "note": "If something is possible for any man it is possible for you too",
+#   "tags": ["4MyChildren", "advice", "anxiety"]
+#
+# }]
