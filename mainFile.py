@@ -5,6 +5,8 @@ from tags import TAGS
 from tkinter import messagebox
 from tkinter import simpledialog
 import os
+from datetime import datetime
+
 
 
 class MyGUI:
@@ -57,6 +59,9 @@ class MyGUI:
     def read_file(self):
         # Read the file and save its contents to the 'items' list
         self.filepath = tk.filedialog.askopenfilename()
+        if not self.filepath:
+            # If no file was selected, do nothing
+            return
 
         # Ask the user for a title
         title = simpledialog.askstring("Title", "Please enter a title for this note:\n If cancel is selected; "
@@ -90,10 +95,13 @@ class MyGUI:
 
         # Get the selected tags and add them to notes
         selected_tags = [self.tags[i] for i, var in enumerate(self.tag_vars) if var.get()]
+        date_added = datetime.now().strftime('%Y-%b-%d').split('-')  # Add the current date in the specified format
         self.notes.append({
-            "title": self.note_title,  # Add the title to the note dictionary
+            "title": self.note_title,
             "note": self.items[self.current_index],
-            "tags": selected_tags
+            "tags": selected_tags,
+            "date_added": [int(date_added[0]), date_added[1], int(date_added[2])]
+            # Convert the date to a list of integers and strings
         })
 
         # Move to the next item in the list
@@ -105,7 +113,7 @@ class MyGUI:
 
             # Save notes to a file if needed
             if self.save_file:
-                with open(self.save_file, "a") as f:
+                with open(self.save_file, "w") as f:
                     json.dump(self.notes, f)
 
             # Clear the notes list
