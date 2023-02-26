@@ -5,6 +5,8 @@ from tags import TAGS
 from tkinter import messagebox
 from tkinter import simpledialog
 import os
+from datetime import datetime
+
 
 
 class MyGUI:
@@ -16,6 +18,8 @@ class MyGUI:
         self.notes = []
         self.note_title = None
         self.save_file = None
+        self.note_location = None
+        self.date_created = None
         self.root.geometry("3000x2000")
         self.root.title("My Note App")
 
@@ -57,6 +61,9 @@ class MyGUI:
     def read_file(self):
         # Read the file and save its contents to the 'items' list
         self.filepath = tk.filedialog.askopenfilename()
+        if not self.filepath:
+            # If no file was selected, do nothing
+            return
 
         # Ask the user for a title
         title = simpledialog.askstring("Title", "Please enter a title for this note:\n If cancel is selected; "
@@ -64,6 +71,18 @@ class MyGUI:
         if not title:
             # If no title was entered, use the file name as the title
             title = os.path.basename(self.filepath)
+
+        location = simpledialog.askstring("Title", "Please enter a location for this note:\n "
+                                                   "If cancel is selected 'unknown' will be added'")
+        if not location:
+            # If no title was entered, use the file name as the title
+            location = "unknown"
+
+        date_created = simpledialog.askstring("Title", "Please enter a date crea")
+
+        if not date_created:
+            # If no title was entered, use the file name as the title
+            location = "unknown"
 
         with open(self.filepath, 'r') as file:
             self.lines = file.readlines()
@@ -80,7 +99,7 @@ class MyGUI:
 
         # Add the title to the note dictionary
         self.note_title = title    # Add the title to the note dictionary
-        self.note_title = title
+        self.note_location = location
 
     def show_next(self):
         if not self.items:
@@ -90,11 +109,15 @@ class MyGUI:
 
         # Get the selected tags and add them to notes
         selected_tags = [self.tags[i] for i, var in enumerate(self.tag_vars) if var.get()]
-        self.notes.append({
-            "title": self.note_title,  # Add the title to the note dictionary
+        date_added = datetime.now().strftime('%Y-%b-%d').split('-')  # Add the current date in the specified format
+        note = {
+            "title": self.note_title,
+            "location": self.note_location,
             "note": self.items[self.current_index],
-            "tags": selected_tags
-        })
+            "tags": selected_tags,
+            "date_added": [int(date_added[0]), date_added[1], int(date_added[2])]
+        }
+        self.notes.append(note)
 
         # Move to the next item in the list
         self.current_index += 1
@@ -105,13 +128,34 @@ class MyGUI:
 
             # Save notes to a file if needed
             if self.save_file:
-                with open(self.save_file, "a") as f:
-                    json.dump(self.notes, f)
+                if os.path.exists(self.save_file):
+                    # If the output file already exists, read in its contents first
+                    try:
+                        with open(self.save_file, "r") as f:
+                            existing_notes = json.load(f)
+                            if not isinstance(existing_notes, list):
+                                # The loaded data is not a list, so create a new empty list
+                                existing_notes = []
+                    except FileNotFoundError:
+                        # If the file does not exist, start with an empty list
+                        existing_notes = []
+
+                else:
+                    existing_notes = []
+
+                # Append the new notes to the existing ones
+                all_notes = existing_notes + self.notes
+
+                # Write all notes to the output file
+                with open(self.save_file, "w") as f:
+                    json.dump(all_notes, f)
 
             # Clear the notes list
             self.notes = []
             self.items = []
             self.note_title = None
+            self.note_location = None
+            self.save_file = None
         else:
             # If there are more items, display the next one and reset the checkboxes
             self.label.config(text=self.items[self.current_index])
