@@ -3,6 +3,8 @@ import tkinter.filedialog
 import tkinter as tk
 from tags import TAGS
 from tkinter import messagebox
+from tkinter import simpledialog
+import os
 
 
 class MyGUI:
@@ -12,6 +14,7 @@ class MyGUI:
         self.current_index = -1
         self.items = []
         self.notes = []
+        self.note_title = None
         self.save_file = None
         self.root.geometry("3000x2000")
         self.root.title("My Note App")
@@ -54,6 +57,14 @@ class MyGUI:
     def read_file(self):
         # Read the file and save its contents to the 'items' list
         self.filepath = tk.filedialog.askopenfilename()
+
+        # Ask the user for a title
+        title = simpledialog.askstring("Title", "Please enter a title for this note:\n If cancel is selected; "
+                                                "The file name will be used")
+        if not title:
+            # If no title was entered, use the file name as the title
+            title = os.path.basename(self.filepath)
+
         with open(self.filepath, 'r') as file:
             self.lines = file.readlines()
             current_item = ""
@@ -67,6 +78,10 @@ class MyGUI:
             if current_item:
                 self.items.append(current_item)
 
+        # Add the title to the note dictionary
+        self.note_title = title    # Add the title to the note dictionary
+        self.note_title = title
+
     def show_next(self):
         if not self.items:
             # If no file has been selected, display an error message
@@ -76,6 +91,7 @@ class MyGUI:
         # Get the selected tags and add them to notes
         selected_tags = [self.tags[i] for i, var in enumerate(self.tag_vars) if var.get()]
         self.notes.append({
+            "title": self.note_title,  # Add the title to the note dictionary
             "note": self.items[self.current_index],
             "tags": selected_tags
         })
@@ -85,7 +101,7 @@ class MyGUI:
         if self.current_index >= len(self.items):
             # If we have reached the end of the list, display a "Finished!" message
             self.current_index = 0
-            self.label.config(text="Finished!")
+            self.label.config(text="You've Finished! Please select a file!")
 
             # Save notes to a file if needed
             if self.save_file:
@@ -95,6 +111,7 @@ class MyGUI:
             # Clear the notes list
             self.notes = []
             self.items = []
+            self.note_title = None
         else:
             # If there are more items, display the next one and reset the checkboxes
             self.label.config(text=self.items[self.current_index])
