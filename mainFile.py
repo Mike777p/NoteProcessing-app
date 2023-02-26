@@ -2,6 +2,8 @@ import json
 import tkinter.filedialog
 import tkinter as tk
 from tags import TAGS
+from tkinter import messagebox
+
 
 class MyGUI:
     def __init__(self, root, tags):
@@ -9,7 +11,7 @@ class MyGUI:
         self.root = root
         self.current_index = -1
         self.items = []
-        self.notes = []  # create a new instance variable to store the notes
+        self.notes = []
         self.save_file = None
         self.root.geometry("3000x2000")
         self.root.title("My Note App")
@@ -17,19 +19,17 @@ class MyGUI:
         # Set up label
         self.label_frame = tk.Frame(self.root)
         self.label_frame.pack()
-        self.label = tk.Label(self.label_frame, text="Select text file to process and choose relevant tags", font=('Arial', 18))
+        self.label = tk.Label(self.label_frame, text="Choose relevant tags for each note", font=('Arial', 18))
         self.label.pack(padx=100, pady=100)
 
-        # Create select file button
-        self.read_button = tk.Button(root, text="Select File", font=('Arial', 18), command=self.read_file).pack(padx=50, pady=50)
-
+        # Create a frame of checkboxes
         self.button_frame = tk.Frame(self.root)
         for config in range(3):
             self.button_frame.columnconfigure(config, weight=1)
         self.rows = 3
         self.row = 0
         self.column = 0
-        self.tag_vars = []  # create a new instance variable to store the BooleanVar objects
+        self.tag_vars = []
         for tag in self.tags:
             var = tk.BooleanVar(value=False)
             self.tag_vars.append(var)
@@ -43,25 +43,36 @@ class MyGUI:
                 self.row += 1
         self.button_frame.pack(fill="x")
 
-        self.next_button = tk.Button(root, text="Next", font=('Arial', 18), command=self.show_next).pack(padx=50, pady=50)
+        # Create a "Next" button
+        self.next_button = tk.Button(root, text="Next", font=('Arial', 18), command=self.show_next)
+        self.next_button.pack(padx=50, pady=50)
+
+        # Create a "Select File" button
+        self.read_button = tk.Button(root, text="Select File", font=('Arial', 18), command=self.read_file)
+        self.read_button.pack(padx=50, pady=50)
 
     def read_file(self):
         # Read the file and save its contents to the 'items' list
         self.filepath = tk.filedialog.askopenfilename()
         with open(self.filepath, 'r') as file:
             self.lines = file.readlines()
-            current_item = ""  # new variable to store the lines for the current item
+            current_item = ""
             for q in self.lines:
-                if not q.strip():  # Skip blank lines
+                if not q.strip():
                     continue
                 current_item += q
-                if q.endswith("\n"):  # Check if the line ends with a newline character
+                if q.endswith("\n"):
                     self.items.append(current_item)
                     current_item = ""
-            if current_item:  # Add the last item if it's not empty
+            if current_item:
                 self.items.append(current_item)
 
     def show_next(self):
+        if not self.items:
+            # If no file has been selected, display an error message
+            messagebox.showinfo("Error", "Please select a file.")
+            return
+
         # Get the selected tags and add them to notes
         selected_tags = [self.tags[i] for i, var in enumerate(self.tag_vars) if var.get()]
         self.notes.append({
@@ -83,6 +94,7 @@ class MyGUI:
 
             # Clear the notes list
             self.notes = []
+            self.items = []
         else:
             # If there are more items, display the next one and reset the checkboxes
             self.label.config(text=self.items[self.current_index])
