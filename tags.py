@@ -10,10 +10,12 @@ TAGS.sort()
 # 1 - Add 'add title' button
 # 2 - Add date added
 # 3 - Add 'location created' button
+# 4 - Append object to in list file not overwrite
 
-# 4 - Add 'data created' button
-# 5 - Read file and go through ten quotes at a time
+# 5 - Add 'data created' button
 # 6 - Sort out beginning quote fault
-# 7 - Append object to in list file not overwrite
+# 7 - Read file and go through ten quotes at a time
+# 8 - Add title to tags
+
 
 

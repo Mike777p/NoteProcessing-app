@@ -17,9 +17,9 @@ class MyGUI:
         self.items = []
         self.notes = []
         self.note_title = None
-        self.save_file = None
         self.note_location = None
         self.date_created = None
+        self.save_file = None
         self.root.geometry("3000x2000")
         self.root.title("My Note App")
 
@@ -72,17 +72,17 @@ class MyGUI:
             # If no title was entered, use the file name as the title
             title = os.path.basename(self.filepath)
 
-        location = simpledialog.askstring("Title", "Please enter a location for this note:\n "
+        location = simpledialog.askstring("Title", "Please enter the location this note was created:\n "
                                                    "If cancel is selected 'unknown' will be added'")
         if not location:
-            # If no title was entered, use the file name as the title
+            # If no location was entered, use the file name as the location
             location = "unknown"
 
-        date_created = simpledialog.askstring("Title", "Please enter a date crea")
+        date_created = simpledialog.askstring("Date Created", "Please enter the month and year this note was created")
 
         if not date_created:
-            # If no title was entered, use the file name as the title
-            location = "unknown"
+            # If no date_created was entered, use the file name as the date_created
+            date_created = "unknown"
 
         with open(self.filepath, 'r') as file:
             self.lines = file.readlines()
@@ -100,6 +100,7 @@ class MyGUI:
         # Add the title to the note dictionary
         self.note_title = title    # Add the title to the note dictionary
         self.note_location = location
+        self.date_created = date_created
 
     def show_next(self):
         if not self.items:
@@ -110,14 +111,15 @@ class MyGUI:
         # Get the selected tags and add them to notes
         selected_tags = [self.tags[i] for i, var in enumerate(self.tag_vars) if var.get()]
         date_added = datetime.now().strftime('%Y-%b-%d').split('-')  # Add the current date in the specified format
-        note = {
+        noteDict = {
             "title": self.note_title,
             "location": self.note_location,
             "note": self.items[self.current_index],
             "tags": selected_tags,
-            "date_added": [int(date_added[0]), date_added[1], int(date_added[2])]
+            "date_added": [int(date_added[0]), date_added[1], int(date_added[2])],
+            "date created": self.date_created
         }
-        self.notes.append(note)
+        self.notes.append(noteDict)
 
         # Move to the next item in the list
         self.current_index += 1
@@ -128,14 +130,17 @@ class MyGUI:
 
             # Save notes to a file if needed
             if self.save_file:
+                print(self.save_file, "<-1 what is it?")
                 if os.path.exists(self.save_file):
+                    print(self.save_file, "<-2 what is it?")
                     # If the output file already exists, read in its contents first
                     try:
                         with open(self.save_file, "r") as f:
-                            existing_notes = json.load(f)
-                            if not isinstance(existing_notes, list):
-                                # The loaded data is not a list, so create a new empty list
+                            if os.path.getsize(self.save_file) == 0:
                                 existing_notes = []
+                            else:
+                                existing_notes = json.load(f)
+
                     except FileNotFoundError:
                         # If the file does not exist, start with an empty list
                         existing_notes = []
