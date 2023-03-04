@@ -1,11 +1,15 @@
 import json
 import tkinter.filedialog
 import tkinter as tk
+
 from tags import TAGS
 from tkinter import messagebox
 from tkinter import simpledialog
 import os
 from datetime import datetime
+import tkinter.ttk as ttk
+from tkcalendar import Calendar, DateEntry
+
 
 
 
@@ -26,7 +30,7 @@ class MyGUI:
         # Set up label
         self.label_frame = tk.Frame(self.root)
         self.label_frame.pack()
-        self.label = tk.Label(self.label_frame, text="Choose relevant tags for each note", font=('Arial', 18))
+        self.label = tk.Label(self.label_frame, text="Press 'Next' and choose relevant tags for each note", font=('Arial', 18))
         self.label.pack(padx=100, pady=100)
 
         # Create a frame of checkboxes
@@ -78,11 +82,9 @@ class MyGUI:
             # If no location was entered, use the file name as the location
             location = "unknown"
 
-        date_created = simpledialog.askstring("Date Created", "Please enter the month and year this note was created")
-
-        if not date_created:
-            # If no date_created was entered, use the file name as the date_created
-            date_created = "unknown"
+        result = messagebox.askyesno("Date Created", "Would you like to enter a date created?")
+        if result:
+            date_created = self.get_date()
 
         with open(self.filepath, 'r') as file:
             self.lines = file.readlines()
@@ -102,6 +104,26 @@ class MyGUI:
         self.note_location = location
         self.date_created = date_created
 
+    def get_date(self):
+        date_created = None
+        def save_selection():
+            nonlocal date_created
+            date_created = cal.selection_get()
+            top.destroy()
+
+        top = tk.Toplevel(root)
+        top.title("Select when note was created")
+
+        cal = Calendar(top,
+                       font="Arial 14", selectmode='day',
+                       cursor="hand1", year=2023, month=7, day=7)
+        cal.pack(fill="both", expand=True)
+        ttk.Button(top, text="OK", command=save_selection).pack()
+
+        top.wait_window()
+
+        return date_created
+
     def show_next(self):
         if not self.items:
             # If no file has been selected, display an error message
@@ -110,14 +132,14 @@ class MyGUI:
 
         # Get the selected tags and add them to notes
         selected_tags = [self.tags[i] for i, var in enumerate(self.tag_vars) if var.get()]
-        date_added = datetime.now().strftime('%Y-%b-%d').split('-')  # Add the current date in the specified format
+        date_added = datetime.now().strftime('%Y-%m-%d').split('-') # Use the numeric month representation
         noteDict = {
             "title": self.note_title,
             "location": self.note_location,
             "note": self.items[self.current_index],
             "tags": selected_tags,
-            "date_added": [int(date_added[0]), date_added[1], int(date_added[2])],
-            "date created": self.date_created
+            "date_added": [int(date_added[0]), int(date_added[1]), int(date_added[2])],
+            "date_created": [self.date_created.year, self.date_created.month, self.date_created.day]
         }
         self.notes.append(noteDict)
 
@@ -161,6 +183,7 @@ class MyGUI:
             self.note_title = None
             self.note_location = None
             self.save_file = None
+            self.date_created = None
         else:
             # If there are more items, display the next one and reset the checkboxes
             self.label.config(text=self.items[self.current_index])
